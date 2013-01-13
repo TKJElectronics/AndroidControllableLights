@@ -8,4 +8,4 @@ This is the code is for controlling a WS2801 LED string with your Arduino using 
 
 You can check out a video demonstration of the project here: <http://www.youtube.com/watch?v=pZSADQihV_Y>
 
-For more information see my blog post at <http://blog.tkjelectronics.dk/> or send me an email at <a href="mailto:thomasj@tkjelectronics.dk">thomasj@tkjelectronics.dk</a>.
+For more information see my blog post at <http://blog.tkjelectronics.dk/> or send me an email at <thomasj@tkjelectronics.dk>.
