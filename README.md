@@ -1,5 +1,4 @@
 # Android Controllable Lights
-<br>
 #### Developed by Thomas Jespersen, TKJ Electronics 2013
 
 The code is released under the GNU General Public License.
