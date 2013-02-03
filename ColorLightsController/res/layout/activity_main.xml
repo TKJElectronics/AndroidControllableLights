@@ -94,7 +94,7 @@
             android:id="@+id/btn_startRun"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Run" />
+            android:text="Start Scroll" />
 
         <Button
             android:id="@+id/btn_runReset"
