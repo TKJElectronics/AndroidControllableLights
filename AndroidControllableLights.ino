@@ -1,5 +1,8 @@
 #include "SPI.h"
 #include "Adafruit_WS2801.h"
+#include <EEPROM.h>
+#include "EEPROMAnything.h"
+
 Adafruit_WS2801 strip = Adafruit_WS2801(50, 8, 9);
 
 char serialInput;
@@ -16,36 +19,83 @@ unsigned int commandCount = 0;
 #define ACTION_SNAP          2
 #define ACTION_RUNNING       3
 #define ACTION_RUNNING_FADE  4
-char stripAction = ACTION_NONE;
 
 // Action definitions/settings
 #define FADE_STEPS 100.0
 #define RUNNING_FADE_STEPS 5.0
 
-// Action variables
-unsigned int actionDelay = 0;
-unsigned int SpeedDelay = 100;
+#define EEPROM_VERSION  0xAB
+#define INIT_FLAGS_ADDR  0
+#define CONFIG_ADDR  4
 
-unsigned char FadeColors[20][3];
-unsigned char FadeColorsCount = 0;
-unsigned char FadeCurrentColor = 0;
-unsigned char FadeCurrentStep = 0;
-float FadeRedChange, FadeGreenChange, FadeBlueChange;
+typedef struct
+{
+  char action;
 
-unsigned char SnapColors[20][3];
-unsigned char SnapColorsCount = 0;
-unsigned char SnapCurrentColor = 0;
+  // Action variables
+  unsigned int actionDelay;
+  unsigned int SpeedDelay;
 
-unsigned char RunningColors[20][3];
-unsigned char RunningColorsCount = 0;
-unsigned char RunningOffset = 0;
+  unsigned char FadeColors[20][3];
+  unsigned char FadeColorsCount;
+  unsigned char FadeCurrentColor;
+  unsigned char FadeCurrentStep;
+  float FadeRedChange, FadeGreenChange, FadeBlueChange;
 
-unsigned char RunningFadeColors[20][3];
-unsigned char RunningFadeColorsCount = 0;
-unsigned char RunningFadeCurrentColor = 0;
-unsigned char RunningFadeCurrentStep = 0;
-unsigned char RunningFadeLED = 0;
-float RunningFadeRedChange, RunningFadeGreenChange, RunningFadeBlueChange;
+  unsigned char SnapColors[20][3];
+  unsigned char SnapColorsCount;
+  unsigned char SnapCurrentColor;
+
+  unsigned char RunningColors[20][3];
+  unsigned char RunningColorsCount;
+  unsigned char RunningOffset;
+
+  unsigned char RunningFadeColors[20][3];
+  unsigned char RunningFadeColorsCount;
+  unsigned char RunningFadeCurrentColor;
+  unsigned char RunningFadeCurrentStep;
+  unsigned char RunningFadeLED;
+  float RunningFadeRedChange, RunningFadeGreenChange, RunningFadeBlueChange;
+} stripCfg_t;
+
+stripCfg_t stripCfg;
+
+void checkInitializationFlags() {
+  uint8_t initFlag;
+  EEPROM_readAnything(INIT_FLAGS_ADDR, initFlag);
+  if (initFlag != EEPROM_VERSION) { // Check if the EEPROM version matches the current one
+    InitializeEEPromValues();
+    EEPROM_updateAnything(INIT_FLAGS_ADDR, EEPROM_VERSION); // After the default values have been restored, set the flags
+  } else {
+    EEPROM_readAnything(CONFIG_ADDR, stripCfg); // Read existing config from EEProm into RAM
+  }
+}
+
+void InitializeEEPromValues(void)
+{
+  stripCfg.action = ACTION_NONE;
+  stripCfg.actionDelay = 0;
+  stripCfg.SpeedDelay = 100;
+  stripCfg.FadeColorsCount = 0;
+  stripCfg.FadeCurrentColor = 0;
+  stripCfg.FadeCurrentStep = 0;
+  stripCfg.SnapColorsCount = 0;
+  stripCfg.SnapCurrentColor = 0;
+  stripCfg.RunningColorsCount = 0;
+  stripCfg.RunningOffset = 0;
+  stripCfg.RunningFadeColorsCount = 0;
+  stripCfg.RunningFadeCurrentColor = 0;
+  stripCfg.RunningFadeCurrentStep = 0;
+  stripCfg.RunningFadeLED = 0;
+  
+  EEPROM_updateAnything(CONFIG_ADDR, stripCfg);  
+}
+
+void saveUpdatedEEPromConfig(void)
+{
+  EEPROM_updateAnything(CONFIG_ADDR, stripCfg);  
+}
+
 
 void setup() {
   Serial.begin(57600); 
@@ -70,6 +120,7 @@ void loop() {
          }
          if (receiveBuffer[3] == ';' && receiveBuffer[7] == ';' && receiveBuffer[11] == ';') {
            parseColorInput(receiveBuffer);  
+           saveUpdatedEEPromConfig();
            setStripColor(global_red, global_green, global_blue);    
          }
       }     
@@ -84,10 +135,11 @@ void loop() {
          }
          if (receiveBuffer[3] == ';' && receiveBuffer[7] == ';' && receiveBuffer[11] == ';') {
            parseColorInput(receiveBuffer);      
-           FadeColors[FadeColorsCount][0] = global_red;
-           FadeColors[FadeColorsCount][1] = global_green;
-           FadeColors[FadeColorsCount][2] = global_blue;         
-           FadeColorsCount++;           
+           stripCfg.FadeColors[stripCfg.FadeColorsCount][0] = global_red;
+           stripCfg.FadeColors[stripCfg.FadeColorsCount][1] = global_green;
+           stripCfg.FadeColors[stripCfg.FadeColorsCount][2] = global_blue;         
+           stripCfg.FadeColorsCount++;  
+           saveUpdatedEEPromConfig();         
          }
       }   
       commandCount++;
@@ -96,7 +148,8 @@ void loop() {
     } 
   
     else if (serialInput == 0x02) { // Reset fade colors
-      FadeColorsCount = 0;    
+      stripCfg.FadeColorsCount = 0;   
+      saveUpdatedEEPromConfig(); 
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);
@@ -110,11 +163,12 @@ void loop() {
            receiveBuffer[i] = Serial.read(); 
          }
          if (receiveBuffer[5] == ';') {
-          SpeedDelay = (receiveBuffer[0] - '0') * 10000;
-          SpeedDelay += (receiveBuffer[1] - '0') * 1000;           
-          SpeedDelay += (receiveBuffer[2] - '0') * 100;
-          SpeedDelay += (receiveBuffer[3] - '0') * 10;
-          SpeedDelay += (receiveBuffer[4] - '0');         
+          stripCfg.SpeedDelay = (receiveBuffer[0] - '0') * 10000;
+          stripCfg.SpeedDelay += (receiveBuffer[1] - '0') * 1000;           
+          stripCfg.SpeedDelay += (receiveBuffer[2] - '0') * 100;
+          stripCfg.SpeedDelay += (receiveBuffer[3] - '0') * 10;
+          stripCfg.SpeedDelay += (receiveBuffer[4] - '0');  
+          saveUpdatedEEPromConfig();       
          }
       }
       commandCount++;
@@ -123,9 +177,10 @@ void loop() {
     }
   
     else if (serialInput == 0x04) { // Enable Fade effect
-      stripAction = ACTION_FADE;
-      FadeCurrentColor = 0;
-      FadeCurrentStep = 0;   
+      stripCfg.action = ACTION_FADE;
+      stripCfg.FadeCurrentColor = 0;
+      stripCfg.FadeCurrentStep = 0;   
+      saveUpdatedEEPromConfig();
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);      
@@ -140,10 +195,11 @@ void loop() {
          }
          if (receiveBuffer[3] == ';' && receiveBuffer[7] == ';' && receiveBuffer[11] == ';') {
            parseColorInput(receiveBuffer);      
-           SnapColors[SnapColorsCount][0] = global_red;
-           SnapColors[SnapColorsCount][1] = global_green;
-           SnapColors[SnapColorsCount][2] = global_blue;         
-           SnapColorsCount++;           
+           stripCfg.SnapColors[stripCfg.SnapColorsCount][0] = global_red;
+           stripCfg.SnapColors[stripCfg.SnapColorsCount][1] = global_green;
+           stripCfg.SnapColors[stripCfg.SnapColorsCount][2] = global_blue;         
+           stripCfg.SnapColorsCount++;    
+           saveUpdatedEEPromConfig();       
          }
       } 
       commandCount++;
@@ -152,15 +208,17 @@ void loop() {
     }  
     
     else if (serialInput == 0x06) { // Reset snap colors
-      SnapColorsCount = 0;    
+      stripCfg.SnapColorsCount = 0;   
+      saveUpdatedEEPromConfig(); 
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);      
     }    
  
     else if (serialInput == 0x07) { // Enable Snap effect
-      stripAction = ACTION_SNAP;
-      SnapCurrentColor = 0;
+      stripCfg.action = ACTION_SNAP;
+      stripCfg.SnapCurrentColor = 0;
+      saveUpdatedEEPromConfig();
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);      
@@ -175,10 +233,11 @@ void loop() {
          }
          if (receiveBuffer[3] == ';' && receiveBuffer[7] == ';' && receiveBuffer[11] == ';') {
            parseColorInput(receiveBuffer);      
-           RunningColors[RunningColorsCount][0] = global_red;
-           RunningColors[RunningColorsCount][1] = global_green;
-           RunningColors[RunningColorsCount][2] = global_blue;         
-           RunningColorsCount++;           
+           stripCfg.RunningColors[stripCfg.RunningColorsCount][0] = global_red;
+           stripCfg.RunningColors[stripCfg.RunningColorsCount][1] = global_green;
+           stripCfg.RunningColors[stripCfg.RunningColorsCount][2] = global_blue;         
+           stripCfg.RunningColorsCount++;           
+           saveUpdatedEEPromConfig();
          }
       } 
       commandCount++;
@@ -187,15 +246,17 @@ void loop() {
     }  
     
     else if (serialInput == 0x09) { // Reset Running colors
-      RunningColorsCount = 0;    
+      stripCfg.RunningColorsCount = 0; 
+      saveUpdatedEEPromConfig();   
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);      
     }    
  
     else if (serialInput == 0x0A) { // Enable Running effect
-      stripAction = ACTION_RUNNING;
-      RunningOffset = 0;
+      stripCfg.action = ACTION_RUNNING;
+      stripCfg.RunningOffset = 0;
+      saveUpdatedEEPromConfig();
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);      
@@ -210,10 +271,11 @@ void loop() {
          }
          if (receiveBuffer[3] == ';' && receiveBuffer[7] == ';' && receiveBuffer[11] == ';') {
            parseColorInput(receiveBuffer);      
-           RunningFadeColors[RunningFadeColorsCount][0] = global_red;
-           RunningFadeColors[RunningFadeColorsCount][1] = global_green;
-           RunningFadeColors[RunningFadeColorsCount][2] = global_blue;         
-           RunningFadeColorsCount++;           
+           stripCfg.RunningFadeColors[stripCfg.RunningFadeColorsCount][0] = global_red;
+           stripCfg.RunningFadeColors[stripCfg.RunningFadeColorsCount][1] = global_green;
+           stripCfg.RunningFadeColors[stripCfg.RunningFadeColorsCount][2] = global_blue;         
+           stripCfg.RunningFadeColorsCount++;           
+           saveUpdatedEEPromConfig();
          }
       } 
       commandCount++;
@@ -222,22 +284,25 @@ void loop() {
     }  
     
     else if (serialInput == 0x0C) { // Reset Running Fade colors
-      RunningFadeColorsCount = 0;    
+      stripCfg.RunningFadeColorsCount = 0;    
+      saveUpdatedEEPromConfig();
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);      
     }    
  
     else if (serialInput == 0x0D) { // Enable Running Fade effect
-      stripAction = ACTION_RUNNING_FADE;
-      RunningFadeCurrentColor = 0;
+      stripCfg.action = ACTION_RUNNING_FADE;
+      stripCfg.RunningFadeCurrentColor = 0;
+      saveUpdatedEEPromConfig();
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);      
     }      
   
     else if (serialInput == 0x0E) { // Disable any effect
-      stripAction = ACTION_NONE;
+      stripCfg.action = ACTION_NONE;
+      saveUpdatedEEPromConfig();
       commandCount++;
       Serial.print("Command #");      
       Serial.println(commandCount);      
@@ -245,30 +310,36 @@ void loop() {
     
   }
   
-  if (stripAction != ACTION_NONE && actionDelay > 0) {
+  if (stripCfg.action != ACTION_NONE && stripCfg.actionDelay > 0) {
     delay(1);
-    actionDelay -= 1;
-  } else if (stripAction == ACTION_NONE && actionDelay > 0) {
-    actionDelay = 0; // Reset actionDelay while inactive
-  } else if (stripAction != ACTION_NONE) {
-    if (stripAction == ACTION_FADE && FadeColorsCount > 0) {
+    stripCfg.actionDelay -= 1;
+    //saveUpdatedEEPromConfig(); // commented to reduce EEProm bandwidth
+  } else if (stripCfg.action == ACTION_NONE && stripCfg.actionDelay > 0) {
+    stripCfg.actionDelay = 0; // Reset stripCfg.actionDelay while inactive
+    saveUpdatedEEPromConfig();
+  } else if (stripCfg.action != ACTION_NONE) {
+    if (stripCfg.action == ACTION_FADE && stripCfg.FadeColorsCount > 0) {
       DoFade(); 
-      actionDelay = SpeedDelay;
+      stripCfg.actionDelay = stripCfg.SpeedDelay;
+    //saveUpdatedEEPromConfig(); // commented to reduce EEProm bandwidth
     }
     
-    else if (stripAction == ACTION_SNAP && SnapColorsCount > 0) {
+    else if (stripCfg.action == ACTION_SNAP && stripCfg.SnapColorsCount > 0) {
       DoSnap(); 
-      actionDelay = SpeedDelay;
+      stripCfg.actionDelay = stripCfg.SpeedDelay;
+    //saveUpdatedEEPromConfig(); // commented to reduce EEProm bandwidth
     }
     
-    else if (stripAction == ACTION_RUNNING && RunningColorsCount > 0) {
+    else if (stripCfg.action == ACTION_RUNNING && stripCfg.RunningColorsCount > 0) {
       DoRunning(); 
-      actionDelay = SpeedDelay;
+      stripCfg.actionDelay = stripCfg.SpeedDelay;
+    //saveUpdatedEEPromConfig(); // commented to reduce EEProm bandwidth
     }    
     
-    else if (stripAction == ACTION_RUNNING_FADE && RunningFadeColorsCount > 0) {
+    else if (stripCfg.action == ACTION_RUNNING_FADE && stripCfg.RunningFadeColorsCount > 0) {
       DoRunningFade(); 
-      actionDelay = SpeedDelay;
+      stripCfg.actionDelay = stripCfg.SpeedDelay;
+    //saveUpdatedEEPromConfig(); // commented to reduce EEProm bandwidth
     }        
   }
   
@@ -321,85 +392,85 @@ void setStripColor(char red, char green, char blue)
 
 void DoFade(void)
 {
-  if (FadeCurrentStep == 0) {
-    if (FadeCurrentColor < (FadeColorsCount-1)) {
-      FadeRedChange = (FadeColors[FadeCurrentColor+1][0] - FadeColors[FadeCurrentColor][0]) / FADE_STEPS;
-      FadeGreenChange = (FadeColors[FadeCurrentColor+1][1] - FadeColors[FadeCurrentColor][1]) / FADE_STEPS;
-      FadeBlueChange = (FadeColors[FadeCurrentColor+1][2] - FadeColors[FadeCurrentColor][2]) / FADE_STEPS;           
+  if (stripCfg.FadeCurrentStep == 0) {
+    if (stripCfg.FadeCurrentColor < (stripCfg.FadeColorsCount-1)) {
+      stripCfg.FadeRedChange = (stripCfg.FadeColors[stripCfg.FadeCurrentColor+1][0] - stripCfg.FadeColors[stripCfg.FadeCurrentColor][0]) / FADE_STEPS;
+      stripCfg.FadeGreenChange = (stripCfg.FadeColors[stripCfg.FadeCurrentColor+1][1] - stripCfg.FadeColors[stripCfg.FadeCurrentColor][1]) / FADE_STEPS;
+      stripCfg.FadeBlueChange = (stripCfg.FadeColors[stripCfg.FadeCurrentColor+1][2] - stripCfg.FadeColors[stripCfg.FadeCurrentColor][2]) / FADE_STEPS;           
     } else {
-      FadeRedChange = (FadeColors[0][0] - FadeColors[FadeCurrentColor][0]) / FADE_STEPS;
-      FadeGreenChange = (FadeColors[0][1] - FadeColors[FadeCurrentColor][1]) / FADE_STEPS;
-      FadeBlueChange = (FadeColors[0][2] - FadeColors[FadeCurrentColor][2]) / FADE_STEPS;      
+      stripCfg.FadeRedChange = (stripCfg.FadeColors[0][0] - stripCfg.FadeColors[stripCfg.FadeCurrentColor][0]) / FADE_STEPS;
+      stripCfg.FadeGreenChange = (stripCfg.FadeColors[0][1] - stripCfg.FadeColors[stripCfg.FadeCurrentColor][1]) / FADE_STEPS;
+      stripCfg.FadeBlueChange = (stripCfg.FadeColors[0][2] - stripCfg.FadeColors[stripCfg.FadeCurrentColor][2]) / FADE_STEPS;      
     } 
-    setStripColor(FadeColors[FadeCurrentColor][0], FadeColors[FadeCurrentColor][1], FadeColors[FadeCurrentColor][2]);    
+    setStripColor(stripCfg.FadeColors[stripCfg.FadeCurrentColor][0], stripCfg.FadeColors[stripCfg.FadeCurrentColor][1], stripCfg.FadeColors[stripCfg.FadeCurrentColor][2]);    
   } else {
-    setStripColor((FadeColors[FadeCurrentColor][0]+(FadeCurrentStep*FadeRedChange)), (FadeColors[FadeCurrentColor][1]+(FadeCurrentStep*FadeGreenChange)), (FadeColors[FadeCurrentColor][2]+(FadeCurrentStep*FadeBlueChange)));    
+    setStripColor((stripCfg.FadeColors[stripCfg.FadeCurrentColor][0]+(stripCfg.FadeCurrentStep*stripCfg.FadeRedChange)), (stripCfg.FadeColors[stripCfg.FadeCurrentColor][1]+(stripCfg.FadeCurrentStep*stripCfg.FadeGreenChange)), (stripCfg.FadeColors[stripCfg.FadeCurrentColor][2]+(stripCfg.FadeCurrentStep*stripCfg.FadeBlueChange)));    
   }
   
-  FadeCurrentStep++;
-  if (FadeCurrentStep > FADE_STEPS) {
-    if (FadeCurrentColor < (FadeColorsCount-1)) {
-      FadeCurrentColor++;  
+  stripCfg.FadeCurrentStep++;
+  if (stripCfg.FadeCurrentStep > FADE_STEPS) {
+    if (stripCfg.FadeCurrentColor < (stripCfg.FadeColorsCount-1)) {
+      stripCfg.FadeCurrentColor++;  
     } else {
-      FadeCurrentColor = 0;
+      stripCfg.FadeCurrentColor = 0;
     }
-    FadeCurrentStep = 0;
+    stripCfg.FadeCurrentStep = 0;
   }
 }
 
 void DoSnap() {
-  setStripColor(SnapColors[SnapCurrentColor][0], SnapColors[SnapCurrentColor][1], SnapColors[SnapCurrentColor][2]);
+  setStripColor(stripCfg.SnapColors[stripCfg.SnapCurrentColor][0], stripCfg.SnapColors[stripCfg.SnapCurrentColor][1], stripCfg.SnapColors[stripCfg.SnapCurrentColor][2]);
   
-  if (SnapCurrentColor < (SnapColorsCount-1)) {
-    SnapCurrentColor++;
+  if (stripCfg.SnapCurrentColor < (stripCfg.SnapColorsCount-1)) {
+    stripCfg.SnapCurrentColor++;
   } else {
-    SnapCurrentColor = 0;
+    stripCfg.SnapCurrentColor = 0;
   }    
 }
 
 void DoRunning() {
   char count;
   for (count = 0; count < 50; count++) {
-    strip.setPixelColor(count, RunningColors[((count+RunningOffset)%RunningColorsCount)][0], RunningColors[((count+RunningOffset)%RunningColorsCount)][1], RunningColors[((count+RunningOffset)%RunningColorsCount)][2]);  
+    strip.setPixelColor(count, stripCfg.RunningColors[((count+stripCfg.RunningOffset)%stripCfg.RunningColorsCount)][0], stripCfg.RunningColors[((count+stripCfg.RunningOffset)%stripCfg.RunningColorsCount)][1], stripCfg.RunningColors[((count+stripCfg.RunningOffset)%stripCfg.RunningColorsCount)][2]);  
   }
   strip.show();
   
-  if (RunningOffset < (RunningColorsCount-1)) {
-    RunningOffset++;
+  if (stripCfg.RunningOffset < (stripCfg.RunningColorsCount-1)) {
+    stripCfg.RunningOffset++;
   } else {
-    RunningOffset = 0;
+    stripCfg.RunningOffset = 0;
   }  
 }
 
 void DoRunningFade() {
-  if (RunningFadeLED == 0 && RunningFadeCurrentStep == 0) {
-    if (RunningFadeCurrentColor < (RunningFadeColorsCount-1)) {
-      RunningFadeRedChange = (RunningFadeColors[RunningFadeCurrentColor+1][0] - RunningFadeColors[RunningFadeCurrentColor][0]) / RUNNING_FADE_STEPS;
-      RunningFadeGreenChange = (RunningFadeColors[RunningFadeCurrentColor+1][1] - RunningFadeColors[RunningFadeCurrentColor][1]) / RUNNING_FADE_STEPS;
-      RunningFadeBlueChange = (RunningFadeColors[RunningFadeCurrentColor+1][2] - RunningFadeColors[RunningFadeCurrentColor][2]) / RUNNING_FADE_STEPS;           
+  if (stripCfg.RunningFadeLED == 0 && stripCfg.RunningFadeCurrentStep == 0) {
+    if (stripCfg.RunningFadeCurrentColor < (stripCfg.RunningFadeColorsCount-1)) {
+      stripCfg.RunningFadeRedChange = (stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor+1][0] - stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][0]) / RUNNING_FADE_STEPS;
+      stripCfg.RunningFadeGreenChange = (stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor+1][1] - stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][1]) / RUNNING_FADE_STEPS;
+      stripCfg.RunningFadeBlueChange = (stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor+1][2] - stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][2]) / RUNNING_FADE_STEPS;           
     } else {
-      RunningFadeRedChange = (RunningFadeColors[0][0] - RunningFadeColors[RunningFadeCurrentColor][0]) / RUNNING_FADE_STEPS;
-      RunningFadeGreenChange = (RunningFadeColors[0][1] - RunningFadeColors[RunningFadeCurrentColor][1]) / RUNNING_FADE_STEPS;
-      RunningFadeBlueChange = (RunningFadeColors[0][2] - RunningFadeColors[RunningFadeCurrentColor][2]) / RUNNING_FADE_STEPS;      
+      stripCfg.RunningFadeRedChange = (stripCfg.RunningFadeColors[0][0] - stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][0]) / RUNNING_FADE_STEPS;
+      stripCfg.RunningFadeGreenChange = (stripCfg.RunningFadeColors[0][1] - stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][1]) / RUNNING_FADE_STEPS;
+      stripCfg.RunningFadeBlueChange = (stripCfg.RunningFadeColors[0][2] - stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][2]) / RUNNING_FADE_STEPS;      
     } 
-    setStripColor(RunningFadeColors[RunningFadeCurrentColor][0], RunningFadeColors[RunningFadeCurrentColor][1], RunningFadeColors[RunningFadeCurrentColor][2]);    
+    setStripColor(stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][0], stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][1], stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][2]);    
   } else {
-    strip.setPixelColor(RunningFadeLED, (RunningFadeColors[RunningFadeCurrentColor][0]+(RunningFadeCurrentStep*RunningFadeRedChange)), (RunningFadeColors[RunningFadeCurrentColor][1]+(RunningFadeCurrentStep*RunningFadeGreenChange)), (RunningFadeColors[RunningFadeCurrentColor][2]+(RunningFadeCurrentStep*RunningFadeBlueChange)));    
+    strip.setPixelColor(stripCfg.RunningFadeLED, (stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][0]+(stripCfg.RunningFadeCurrentStep*stripCfg.RunningFadeRedChange)), (stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][1]+(stripCfg.RunningFadeCurrentStep*stripCfg.RunningFadeGreenChange)), (stripCfg.RunningFadeColors[stripCfg.RunningFadeCurrentColor][2]+(stripCfg.RunningFadeCurrentStep*stripCfg.RunningFadeBlueChange)));    
     strip.show();
   }
   
-  RunningFadeCurrentStep++;
-  if (RunningFadeCurrentStep > RUNNING_FADE_STEPS) {
-    if (RunningFadeLED < 50-1) {
-      RunningFadeLED++;
+  stripCfg.RunningFadeCurrentStep++;
+  if (stripCfg.RunningFadeCurrentStep > RUNNING_FADE_STEPS) {
+    if (stripCfg.RunningFadeLED < 50-1) {
+      stripCfg.RunningFadeLED++;
     } else {
-      RunningFadeLED = 0;
-      if (RunningFadeCurrentColor < (RunningFadeColorsCount-1)) {
-        RunningFadeCurrentColor++;  
+      stripCfg.RunningFadeLED = 0;
+      if (stripCfg.RunningFadeCurrentColor < (stripCfg.RunningFadeColorsCount-1)) {
+        stripCfg.RunningFadeCurrentColor++;  
       } else {
-        RunningFadeCurrentColor = 0;
+        stripCfg.RunningFadeCurrentColor = 0;
       }      
     }
-    RunningFadeCurrentStep = 0;
+    stripCfg.RunningFadeCurrentStep = 0;
   }  
 }
