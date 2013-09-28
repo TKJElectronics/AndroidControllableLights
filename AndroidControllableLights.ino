@@ -24,7 +24,7 @@ unsigned int commandCount = 0;
 #define FADE_STEPS 100.0
 #define RUNNING_FADE_STEPS 5.0
 
-#define EEPROM_VERSION  0xAB
+const uint8_t EEPROM_VERSION = 0xAB;
 #define INIT_FLAGS_ADDR  0
 #define CONFIG_ADDR  4
 
@@ -63,10 +63,10 @@ stripCfg_t stripCfg;
 void checkInitializationFlags() {
   uint8_t initFlag;
   EEPROM_readAnything(INIT_FLAGS_ADDR, initFlag);
-  if (initFlag != EEPROM_VERSION) { // Check if the EEPROM version matches the current one
+  if (initFlag != EEPROM_VERSION) { // Check if the EEPROM version matches the current one  
     InitializeEEPromValues();
     EEPROM_updateAnything(INIT_FLAGS_ADDR, EEPROM_VERSION); // After the default values have been restored, set the flags
-  } else {
+  } else {  
     EEPROM_readAnything(CONFIG_ADDR, stripCfg); // Read existing config from EEProm into RAM
   }
 }
@@ -100,9 +100,17 @@ void saveUpdatedEEPromConfig(void)
 void setup() {
   Serial.begin(57600); 
   
+  Serial.println("Checking initialization flags");  
+  checkInitializationFlags();
+  
+  Serial.print("Action: ");
+  Serial.println(stripCfg.action);
+  
+  Serial.println("strip.begin();");
   strip.begin();
 
   // Update LED contents, to start they are all 'off'
+  Serial.println("strip.show();");  
   strip.show();  
 }
 
@@ -307,6 +315,13 @@ void loop() {
       Serial.print("Command #");      
       Serial.println(commandCount);      
     }
+    
+    else if (serialInput == 0x1A) { // Invalidate EEProm
+      EEPROM_updateAnything(INIT_FLAGS_ADDR, (uint8_t)0xFF); 
+      commandCount++;
+      Serial.print("Command #");      
+      Serial.println(commandCount);      
+    }    
     
   }
   
