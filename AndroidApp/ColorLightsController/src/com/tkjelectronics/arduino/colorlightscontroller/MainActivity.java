@@ -396,15 +396,6 @@ public class MainActivity extends Activity {
         dialog.show();
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
-    }
-
-
     boolean isBTconnected() {
         return mmSocket != null && mmOutputStream != null && mmInputStream != null;
     }
