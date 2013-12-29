@@ -250,7 +250,7 @@ public class MainActivity extends Activity {
 
 
     public void LiveColorPicker() {
-        AmbilWarnaDialog dialog = new AmbilWarnaDialog(this, (MainActivity.previousColor | 0xFF000000), new OnAmbilWarnaListener() {
+        new AmbilWarnaDialog(this, (previousColor | 0xFF000000), new OnAmbilWarnaListener() {
 
             // Executes, when user click Cancel button
             @Override
@@ -268,16 +268,15 @@ public class MainActivity extends Activity {
 
             @Override
             public void onChange(AmbilWarnaDialog dialog, int color) {
-                MainActivity.previousColor = color;
+                previousColor = color;
                 viewNewColor.setBackgroundColor(color);
             }
 
-        });
-        dialog.show();
+        }).show();
     }
 
     public void FadeColorAdd() {
-        AmbilWarnaDialog dialog = new AmbilWarnaDialog(this, (MainActivity.previousColor | 0xFF000000), new OnAmbilWarnaListener() {
+        new AmbilWarnaDialog(this, (previousColor | 0xFF000000), new OnAmbilWarnaListener() {
 
             // Executes, when user click Cancel button
             @Override
@@ -288,13 +287,10 @@ public class MainActivity extends Activity {
             // Executes, when user click OK button
             @Override
             public void onOk(AmbilWarnaDialog dialog, int color) {
-                MainActivity.previousColor = color;
-                try {
-                    AddFadeColor(color);
-                    fadeColorsCount++;
-                    fadeColorsCountLabel.setText(Integer.toString(MainActivity.fadeColorsCount));
-                } catch (IOException ignored) {
-                }
+                previousColor = color;
+                AddFadeColor(color);
+                fadeColorsCount++;
+                fadeColorsCountLabel.setText(Integer.toString(fadeColorsCount));
             }
 
             @Override
@@ -302,12 +298,11 @@ public class MainActivity extends Activity {
 
             }
 
-        });
-        dialog.show();
+        }).show();
     }
 
     public void SnapColorAdd() {
-        AmbilWarnaDialog dialog = new AmbilWarnaDialog(this, (MainActivity.previousColor | 0xFF000000), new OnAmbilWarnaListener() {
+        new AmbilWarnaDialog(this, (previousColor | 0xFF000000), new OnAmbilWarnaListener() {
 
             // Executes, when user click Cancel button
             @Override
@@ -318,13 +313,10 @@ public class MainActivity extends Activity {
             // Executes, when user click OK button
             @Override
             public void onOk(AmbilWarnaDialog dialog, int color) {
-                MainActivity.previousColor = color;
-                try {
-                    AddSnapColor(color);
-                    snapColorsCount++;
-                    snapColorsCountLabel.setText(Integer.toString(MainActivity.snapColorsCount));
-                } catch (IOException ignored) {
-                }
+                previousColor = color;
+                AddSnapColor(color);
+                snapColorsCount++;
+                snapColorsCountLabel.setText(Integer.toString(snapColorsCount));
             }
 
             @Override
@@ -332,12 +324,11 @@ public class MainActivity extends Activity {
 
             }
 
-        });
-        dialog.show();
+        }).show();
     }
 
     public void RunColorAdd() {
-        AmbilWarnaDialog dialog = new AmbilWarnaDialog(this, (MainActivity.previousColor | 0xFF000000), new OnAmbilWarnaListener() {
+        new AmbilWarnaDialog(this, (previousColor | 0xFF000000), new OnAmbilWarnaListener() {
 
             // Executes, when user click Cancel button
             @Override
@@ -348,13 +339,10 @@ public class MainActivity extends Activity {
             // Executes, when user click OK button
             @Override
             public void onOk(AmbilWarnaDialog dialog, int color) {
-                MainActivity.previousColor = color;
-                try {
-                    AddRunColor(color);
-                    runColorsCount++;
-                    runColorsCountLabel.setText(Integer.toString(MainActivity.runColorsCount));
-                } catch (IOException ignored) {
-                }
+                previousColor = color;
+                AddRunColor(color);
+                runColorsCount++;
+                runColorsCountLabel.setText(Integer.toString(runColorsCount));
             }
 
             @Override
@@ -362,12 +350,11 @@ public class MainActivity extends Activity {
 
             }
 
-        });
-        dialog.show();
+        }).show();
     }
 
     public void RunFadeColorAdd() {
-        AmbilWarnaDialog dialog = new AmbilWarnaDialog(this, (MainActivity.previousColor | 0xFF000000), new OnAmbilWarnaListener() {
+        new AmbilWarnaDialog(this, (previousColor | 0xFF000000), new OnAmbilWarnaListener() {
 
             // Executes, when user click Cancel button
             @Override
@@ -378,13 +365,10 @@ public class MainActivity extends Activity {
             // Executes, when user click OK button
             @Override
             public void onOk(AmbilWarnaDialog dialog, int color) {
-                MainActivity.previousColor = color;
-                try {
-                    AddRunFadeColor(color);
-                    runFadeColorsCount++;
-                    runFadeColorsCountLabel.setText(Integer.toString(MainActivity.runFadeColorsCount));
-                } catch (IOException ignored) {
-                }
+                previousColor = color;
+                AddRunFadeColor(color);
+                runFadeColorsCount++;
+                runFadeColorsCountLabel.setText(Integer.toString(runFadeColorsCount));
             }
 
             @Override
@@ -392,8 +376,7 @@ public class MainActivity extends Activity {
 
             }
 
-        });
-        dialog.show();
+        }).show();
     }
 
     boolean isBTconnected() {
