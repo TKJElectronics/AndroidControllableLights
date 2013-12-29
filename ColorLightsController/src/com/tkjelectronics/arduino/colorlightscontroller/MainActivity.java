@@ -1,4 +1,4 @@
-package tkjelectronics.arduino.colorlightscontroller;
+package com.tkjelectronics.arduino.colorlightscontroller;
 
 import java.io.InputStream;
 import java.io.OutputStream;

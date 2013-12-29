@@ -9,7 +9,7 @@ buildscript {
 }
 
 allprojects {
-	group = 'tkjelectronics.arduino.colorlightscontroller'
+	group = 'com.tkjelectronics.arduino.colorlightscontroller'
 	version = '1.0'
 
 	repositories {
