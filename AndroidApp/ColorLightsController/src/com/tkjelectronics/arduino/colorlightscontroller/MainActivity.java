@@ -50,7 +50,6 @@ public class MainActivity extends Activity {
     Thread workerThread;
     byte[] readBuffer;
     int readBufferPosition;
-    int counter;
     volatile boolean stopWorker;
 
     Thread rapidThread;
@@ -66,7 +65,7 @@ public class MainActivity extends Activity {
         Button openButton = (Button) findViewById(R.id.btn_open);
         Button closeButton = (Button) findViewById(R.id.btn_close);
         statusLabel = (TextView) findViewById(R.id.statusText);
-        viewNewColor = (View) findViewById(R.id.colorView);
+        viewNewColor = findViewById(R.id.colorView);
         Button mShow = (Button) findViewById(R.id.btn_show);
         fadeColorsCountLabel = (TextView) findViewById(R.id.fadeCount);
         snapColorsCountLabel = (TextView) findViewById(R.id.snapCount);
@@ -108,7 +107,7 @@ public class MainActivity extends Activity {
                 try {
                     findBT();
                     openBT();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -118,7 +117,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 try {
                     closeBT();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -129,7 +128,7 @@ public class MainActivity extends Activity {
                 try {
                     if (isBTconnected())
                         DisableEffects();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -141,7 +140,7 @@ public class MainActivity extends Activity {
                     if (isBTconnected())
                         DisableEffects();
                     BlackOut();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -152,7 +151,7 @@ public class MainActivity extends Activity {
                 try {
                     if (isBTconnected())
                         EnableFadeEffect();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -173,7 +172,7 @@ public class MainActivity extends Activity {
                         ResetFadeColors();
                     fadeColorsCount = 0;
                     fadeColorsCountLabel.setText(Integer.toString(fadeColorsCount));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -182,9 +181,9 @@ public class MainActivity extends Activity {
         setSpeedButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 try {
-                    if (isBTconnected())
+                    if (isBTconnected() && speedText.getText() != null)
                         SetSpeed(Integer.valueOf(speedText.getText().toString()));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -195,7 +194,7 @@ public class MainActivity extends Activity {
                 try {
                     if (isBTconnected())
                         EnableSnapEffect();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -216,7 +215,7 @@ public class MainActivity extends Activity {
                         ResetSnapColors();
                     snapColorsCount = 0;
                     snapColorsCountLabel.setText(Integer.toString(snapColorsCount));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -227,7 +226,7 @@ public class MainActivity extends Activity {
                 try {
                     if (isBTconnected())
                         EnableRunEffect();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -248,7 +247,7 @@ public class MainActivity extends Activity {
                         ResetRunColors();
                     runColorsCount = 0;
                     runColorsCountLabel.setText(Integer.toString(runColorsCount));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -259,7 +258,7 @@ public class MainActivity extends Activity {
                 try {
                     if (isBTconnected())
                         EnableRunFadeEffect();
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -280,7 +279,7 @@ public class MainActivity extends Activity {
                         ResetRunFadeColors();
                     runFadeColorsCount = 0;
                     runFadeColorsCountLabel.setText(Integer.toString(runFadeColorsCount));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
         });
@@ -331,7 +330,7 @@ public class MainActivity extends Activity {
                     AddFadeColor(color);
                     fadeColorsCount++;
                     fadeColorsCountLabel.setText(Integer.toString(MainActivity.fadeColorsCount));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
 
@@ -361,7 +360,7 @@ public class MainActivity extends Activity {
                     AddSnapColor(color);
                     snapColorsCount++;
                     snapColorsCountLabel.setText(Integer.toString(MainActivity.snapColorsCount));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
 
@@ -391,7 +390,7 @@ public class MainActivity extends Activity {
                     AddRunColor(color);
                     runColorsCount++;
                     runColorsCountLabel.setText(Integer.toString(MainActivity.runColorsCount));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
 
@@ -421,7 +420,7 @@ public class MainActivity extends Activity {
                     AddRunFadeColor(color);
                     runFadeColorsCount++;
                     runFadeColorsCountLabel.setText(Integer.toString(MainActivity.runFadeColorsCount));
-                } catch (IOException ex) {
+                } catch (IOException ignored) {
                 }
             }
 
@@ -444,10 +443,7 @@ public class MainActivity extends Activity {
 
 
     boolean isBTconnected() {
-        if (mmDevice == null) return false;
-        if (mBluetoothAdapter == null) return false;
-        if (mmSocket == null) return false;
-        return true;
+        return mmDevice != null && mBluetoothAdapter != null && mmSocket != null;
     }
 
     void findBT() {
@@ -463,9 +459,9 @@ public class MainActivity extends Activity {
         }
 
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        if (pairedDevices.size() > 0) {
+        if (pairedDevices != null && pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
-                if (device.getName().equals("quadcopter")) {
+                if (device.getName() != null && device.getName().equals("quadcopter")) {
                     mmDevice = device;
                     break;
                 }
@@ -500,8 +496,8 @@ public class MainActivity extends Activity {
                         int bytesAvailable = mmInputStream.available();
                         if (bytesAvailable > 0) {
                             byte[] packetBytes = new byte[bytesAvailable];
-                            mmInputStream.read(packetBytes);
-                            for (int i = 0; i < bytesAvailable; i++) {
+                            int nbytes = mmInputStream.read(packetBytes, 0, bytesAvailable);
+                            for (int i = 0; i < nbytes; i++) {
                                 byte b = packetBytes[i];
                                 if (b == delimiter) {
                                     byte[] encodedBytes = new byte[readBufferPosition];
@@ -563,12 +559,12 @@ public class MainActivity extends Activity {
 
                 while (!Thread.currentThread().isInterrupted() && !stopRapidWorker) {
                     try {
-                        red = (int) ((previousColor >> 16) & 0xFF);
-                        green = (int) ((previousColor >> 8) & 0xFF);
-                        blue = (int) ((previousColor >> 0) & 0xFF);
+                        red = ((previousColor >> 16) & 0xFF);
+                        green = ((previousColor >> 8) & 0xFF);
+                        blue = (previousColor & 0xFF);
                         //alpha= (int) ((tempColor >> 24) & 0xFF);
                         //String msg = Long.toString(tempColor);
-                        String msg = String.format("%c%03d;%03d;%03d;", 0x0F, red, green, blue);  // 0x0A = Color command
+                        String msg = String.format("%d%03d;%03d;%03d;", 0x0F, red, green, blue);  // 0x0A = Color command
                         mmOutputStream.write(msg.getBytes());
 
                            /*buffer[0] = red;
@@ -593,17 +589,17 @@ public class MainActivity extends Activity {
     }
 
     void BlackOut() throws IOException {
-        String msg = String.format("%c%03d;%03d;%03d;", 0x0F, 0, 0, 0);  // 0x0A = Color set command
+        String msg = String.format("%d%03d;%03d;%03d;", 0x0F, 0, 0, 0);  // 0x0A = Color set command
         mmOutputStream.write(msg.getBytes());
     }
 
     void AddFadeColor(int color) throws IOException {
-        int red = (int) ((color >> 16) & 0xFF);
-        int green = (int) ((color >> 8) & 0xFF);
-        int blue = (int) ((color >> 0) & 0xFF);
+        int red = ((color >> 16) & 0xFF);
+        int green = ((color >> 8) & 0xFF);
+        int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
-        String msg = String.format("%c%03d;%03d;%03d;", 0x01, red, green, blue);  // 0x01 = Fade color command
+        String msg = String.format("%d%03d;%03d;%03d;", 0x01, red, green, blue);  // 0x01 = Fade color command
         mmOutputStream.write(msg.getBytes());
     }
 
@@ -627,7 +623,7 @@ public class MainActivity extends Activity {
 
     void SetSpeed(int speed) throws IOException {
         if (speed < 100000) {
-            String msg = String.format("%c%05d;", 0x03, speed);  // 0x03 = Speed command
+            String msg = String.format("%d%05d;", 0x03, speed);  // 0x03 = Speed command
             mmOutputStream.write(msg.getBytes());
         }
     }
@@ -645,12 +641,12 @@ public class MainActivity extends Activity {
     }
 
     void AddSnapColor(int color) throws IOException {
-        int red = (int) ((color >> 16) & 0xFF);
-        int green = (int) ((color >> 8) & 0xFF);
-        int blue = (int) ((color >> 0) & 0xFF);
+        int red = ((color >> 16) & 0xFF);
+        int green = ((color >> 8) & 0xFF);
+        int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
-        String msg = String.format("%c%03d;%03d;%03d;", 0x05, red, green, blue);  // 0x01 = Snap color command
+        String msg = String.format("%d%03d;%03d;%03d;", 0x05, red, green, blue);  // 0x01 = Snap color command
         mmOutputStream.write(msg.getBytes());
     }
 
@@ -667,12 +663,12 @@ public class MainActivity extends Activity {
     }
 
     void AddRunColor(int color) throws IOException {
-        int red = (int) ((color >> 16) & 0xFF);
-        int green = (int) ((color >> 8) & 0xFF);
-        int blue = (int) ((color >> 0) & 0xFF);
+        int red = ((color >> 16) & 0xFF);
+        int green = ((color >> 8) & 0xFF);
+        int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
-        String msg = String.format("%c%03d;%03d;%03d;", 0x08, red, green, blue);  // 0x01 = Run color command
+        String msg = String.format("%d%03d;%03d;%03d;", 0x08, red, green, blue);  // 0x01 = Run color command
         mmOutputStream.write(msg.getBytes());
     }
 
@@ -689,12 +685,12 @@ public class MainActivity extends Activity {
     }
 
     void AddRunFadeColor(int color) throws IOException {
-        int red = (int) ((color >> 16) & 0xFF);
-        int green = (int) ((color >> 8) & 0xFF);
-        int blue = (int) ((color >> 0) & 0xFF);
+        int red = ((color >> 16) & 0xFF);
+        int green = ((color >> 8) & 0xFF);
+        int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
-        String msg = String.format("%c%03d;%03d;%03d;", 0x0B, red, green, blue);  // 0x01 = Run color command
+        String msg = String.format("%d%03d;%03d;%03d;", 0x0B, red, green, blue);  // 0x01 = Run color command
         mmOutputStream.write(msg.getBytes());
     }
 
