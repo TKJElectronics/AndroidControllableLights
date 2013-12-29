@@ -1,6 +1,5 @@
-#include "SPI.h"
-#include "Adafruit_WS2801.h"
-#include <EEPROM.h>
+#include <SPI.h>
+#include <Adafruit_WS2801.h>
 #include "EEPROMAnything.h"
 
 Adafruit_WS2801 strip = Adafruit_WS2801(50, 8, 9);
