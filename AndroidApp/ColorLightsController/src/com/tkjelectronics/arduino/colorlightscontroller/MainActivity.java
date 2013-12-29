@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
 
     Thread rapidThread;
     volatile boolean stopRapidWorker;
-    private Handler serialHandler = new Handler();
+    //private Handler serialHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -565,7 +565,7 @@ public class MainActivity extends Activity {
                     blue = (previousColor & 0xFF);
                     //alpha= (int) ((tempColor >> 24) & 0xFF);
                     //String msg = Long.toString(tempColor);
-                    String msg = String.format("%d%03d;%03d;%03d;", 0x0F, red, green, blue);  // 0x0A = Color command
+                    String msg = String.format("%c%03d;%03d;%03d;", (char)0x0F, red, green, blue);  // 0x0A = Color command
                     if (!write(msg))
                         stopRapidWorker = true;
 
@@ -588,7 +588,7 @@ public class MainActivity extends Activity {
     }
 
     void BlackOut() {
-        String msg = String.format("%d%03d;%03d;%03d;", 0x0F, 0, 0, 0);  // 0x0A = Color set command
+        String msg = String.format("%c%03d;%03d;%03d;", (char)0x0F, 0, 0, 0);  // 0x0A = Color set command
         write(msg);
     }
 
@@ -598,7 +598,7 @@ public class MainActivity extends Activity {
         int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
-        String msg = String.format("%d%03d;%03d;%03d;", 0x01, red, green, blue);  // 0x01 = Fade color command
+        String msg = String.format("%c%03d;%03d;%03d;", (char)0x01, red, green, blue);  // 0x01 = Fade color command
         write(msg);
     }
 
@@ -622,7 +622,7 @@ public class MainActivity extends Activity {
 
     void SetSpeed(int speed) {
         if (speed < 100000) {
-            String msg = String.format("%d%05d;", 0x03, speed);  // 0x03 = Speed command
+            String msg = String.format("%c%05d;", (char)0x03, speed);  // 0x03 = Speed command
             write(msg);
         }
     }
@@ -645,7 +645,7 @@ public class MainActivity extends Activity {
         int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
-        String msg = String.format("%d%03d;%03d;%03d;", 0x05, red, green, blue);  // 0x01 = Snap color command
+        String msg = String.format("%c%03d;%03d;%03d;", (char)0x05, red, green, blue);  // 0x01 = Snap color command
         write(msg);
     }
 
@@ -667,7 +667,7 @@ public class MainActivity extends Activity {
         int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
-        String msg = String.format("%d%03d;%03d;%03d;", 0x08, red, green, blue);  // 0x01 = Run color command
+        String msg = String.format("%c%03d;%03d;%03d;", (char)0x08, red, green, blue);  // 0x01 = Run color command
         write(msg);
     }
 
@@ -689,7 +689,7 @@ public class MainActivity extends Activity {
         int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
-        String msg = String.format("%d%03d;%03d;%03d;", 0x0B, red, green, blue);  // 0x01 = Run color command
+        String msg = String.format("%c%03d;%03d;%03d;", (char)0x0B, red, green, blue);  // 0x01 = Run color command
         write(msg);
     }
 
