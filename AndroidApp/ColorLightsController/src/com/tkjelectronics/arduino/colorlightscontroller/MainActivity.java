@@ -248,6 +248,12 @@ public class MainActivity extends Activity {
         });
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        closeBT();
+    }
+
 
     public void LiveColorPicker() {
         new AmbilWarnaDialog(this, (previousColor | 0xFF000000), new OnAmbilWarnaListener() {
