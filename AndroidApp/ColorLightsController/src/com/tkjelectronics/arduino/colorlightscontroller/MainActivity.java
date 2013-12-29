@@ -1,21 +1,25 @@
 package com.tkjelectronics.arduino.colorlightscontroller;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Menu;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,6 +27,7 @@ import yuku.ambilwarna.AmbilWarnaDialog;
 import yuku.ambilwarna.AmbilWarnaDialog.OnAmbilWarnaListener;
 
 public class MainActivity extends Activity {
+    private static final UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); // Standard SerialPortService ID
 
     TextView statusLabel;
     EditText speedText;
@@ -44,18 +49,15 @@ public class MainActivity extends Activity {
 
     BluetoothAdapter mBluetoothAdapter;
     BluetoothSocket mmSocket;
-    BluetoothDevice mmDevice = null;
     OutputStream mmOutputStream;
     InputStream mmInputStream;
     Thread workerThread;
-    byte[] readBuffer;
     int readBufferPosition;
     volatile boolean stopWorker;
 
     Thread rapidThread;
     volatile boolean stopRapidWorker;
     private Handler serialHandler = new Handler();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,43 +106,31 @@ public class MainActivity extends Activity {
         // Open Button
         openButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    findBT();
-                    openBT();
-                } catch (IOException ignored) {
-                }
+                openBT();
             }
         });
 
         // Close button
         closeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    closeBT();
-                } catch (IOException ignored) {
-                }
+                closeBT();
             }
         });
 
         // Disable effects button
         disableEffectsButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        DisableEffects();
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    DisableEffects();
             }
         });
 
         // Black out button
         blackOutButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        DisableEffects();
+                if (isBTconnected()) {
+                    DisableEffects();
                     BlackOut();
-                } catch (IOException ignored) {
                 }
             }
         });
@@ -148,11 +138,8 @@ public class MainActivity extends Activity {
         // Enable fade effect button
         enableFadeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        EnableFadeEffect();
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    EnableFadeEffect();
             }
         });
 
@@ -167,35 +154,26 @@ public class MainActivity extends Activity {
         // Reset fade colors button
         fadeResetButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        ResetFadeColors();
-                    fadeColorsCount = 0;
-                    fadeColorsCountLabel.setText(Integer.toString(fadeColorsCount));
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    ResetFadeColors();
+                fadeColorsCount = 0;
+                fadeColorsCountLabel.setText(Integer.toString(fadeColorsCount));
             }
         });
 
         // Reset fade colors button
         setSpeedButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected() && speedText.getText() != null)
-                        SetSpeed(Integer.valueOf(speedText.getText().toString()));
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected() && speedText.getText() != null)
+                    SetSpeed(Integer.valueOf(speedText.getText().toString()));
             }
         });
 
         // Enable snap effect button
         enableSnapButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        EnableSnapEffect();
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    EnableSnapEffect();
             }
         });
 
@@ -210,24 +188,18 @@ public class MainActivity extends Activity {
         // Reset snap colors button
         snapResetButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        ResetSnapColors();
-                    snapColorsCount = 0;
-                    snapColorsCountLabel.setText(Integer.toString(snapColorsCount));
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    ResetSnapColors();
+                snapColorsCount = 0;
+                snapColorsCountLabel.setText(Integer.toString(snapColorsCount));
             }
         });
 
         // Enable running effect button
         enableRunButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        EnableRunEffect();
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    EnableRunEffect();
             }
         });
 
@@ -242,24 +214,18 @@ public class MainActivity extends Activity {
         // Reset running colors button
         runResetButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        ResetRunColors();
-                    runColorsCount = 0;
-                    runColorsCountLabel.setText(Integer.toString(runColorsCount));
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    ResetRunColors();
+                runColorsCount = 0;
+                runColorsCountLabel.setText(Integer.toString(runColorsCount));
             }
         });
 
         // Enable running fade effect button
         enableRunFadeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        EnableRunFadeEffect();
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    EnableRunFadeEffect();
             }
         });
 
@@ -274,13 +240,10 @@ public class MainActivity extends Activity {
         // Reset running fade colors button
         runFadeResetButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    if (isBTconnected())
-                        ResetRunFadeColors();
-                    runFadeColorsCount = 0;
-                    runFadeColorsCountLabel.setText(Integer.toString(runFadeColorsCount));
-                } catch (IOException ignored) {
-                }
+                if (isBTconnected())
+                    ResetRunFadeColors();
+                runFadeColorsCount = 0;
+                runFadeColorsCountLabel.setText(Integer.toString(runFadeColorsCount));
             }
         });
     }
@@ -443,14 +406,14 @@ public class MainActivity extends Activity {
 
 
     boolean isBTconnected() {
-        return mmDevice != null && mBluetoothAdapter != null && mmSocket != null;
+        return mmSocket != null && mmOutputStream != null && mmInputStream != null;
     }
 
-    void findBT() {
-        mmDevice = null;
+    void openBT() {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
-            statusLabel.setText("No bluetooth adapter available");
+            statusLabel.setText("No Bluetooth adapter available");
+            return;
         }
 
         if (!mBluetoothAdapter.isEnabled()) {
@@ -458,28 +421,77 @@ public class MainActivity extends Activity {
             startActivityForResult(enableBluetooth, 0);
         }
 
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+        closeBT(); // Close current connection
+
+        final ArrayList<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
+        final ArrayAdapter<String> deviceNames = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
+
+        final Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         if (pairedDevices != null && pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
-                if (device.getName() != null && device.getName().equals("quadcopter")) {
-                    mmDevice = device;
-                    break;
-                }
+                devices.add(device);
+                deviceNames.add(device.getName());
             }
-        }
-        statusLabel.setText("Bluetooth Device Found");
+        } else
+            return;
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select device: ")
+                .setAdapter(deviceNames, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int index) {
+                        BluetoothDevice device = devices.get(index);
+                        if (device != null) {
+                            dialog.dismiss();
+                            String toast;
+                            if (connectBT(device))
+                                toast = "Connected to: " + device.getName();
+                            else
+                                toast = "Could not connect to device";
+
+                            if (getApplicationContext() != null)
+                                Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .create().show();
     }
 
-    void openBT() throws IOException {
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
-        mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-        mmSocket.connect();
-        mmOutputStream = mmSocket.getOutputStream();
-        mmInputStream = mmSocket.getInputStream();
+    boolean connectBT(BluetoothDevice device) {
+        BluetoothSocket tmpSock;
+        InputStream tmpIn;
+        OutputStream tmpOut;
+
+        try {
+            tmpSock = device.createRfcommSocketToServiceRecord(uuid);
+        } catch (IOException ex) {
+            return false;
+        }
+        mmSocket = tmpSock;
+
+        try {
+            mmSocket.connect();
+        } catch (IOException ex) {
+            try {
+                mmSocket.close();
+            } catch (IOException ignored) {
+            }
+            return false;
+        }
+
+        try {
+            tmpOut = mmSocket.getOutputStream();
+            tmpIn = mmSocket.getInputStream();
+        } catch (IOException ex) {
+            return false;
+        }
+        mmOutputStream = tmpOut;
+        mmInputStream = tmpIn;
 
         beginListenForData();
 
         statusLabel.setText("Bluetooth Opened");
+        return true;
     }
 
     void beginListenForData() {
@@ -488,16 +500,17 @@ public class MainActivity extends Activity {
 
         stopWorker = false;
         readBufferPosition = 0;
-        readBuffer = new byte[1024];
+        final byte[] readBuffer = new byte[1024];
+
         workerThread = new Thread(new Runnable() {
             public void run() {
+                byte[] packetBytes = new byte[1024];
+
                 while (!Thread.currentThread().isInterrupted() && !stopWorker) {
                     try {
-                        int bytesAvailable = mmInputStream.available();
-                        if (bytesAvailable > 0) {
-                            byte[] packetBytes = new byte[bytesAvailable];
-                            int nbytes = mmInputStream.read(packetBytes, 0, bytesAvailable);
-                            for (int i = 0; i < nbytes; i++) {
+                        if (mmInputStream.available() > 0) {
+                            int bytes = mmInputStream.read(packetBytes);
+                            for (int i = 0; i < bytes; i++) {
                                 byte b = packetBytes[i];
                                 if (b == delimiter) {
                                     byte[] encodedBytes = new byte[readBufferPosition];
@@ -525,30 +538,45 @@ public class MainActivity extends Activity {
         workerThread.start();
     }
 
-    void closeBT() throws IOException {
+    void closeBT() {
         stopWorker = true;
-        mmOutputStream.close();
-        mmInputStream.close();
-        mmSocket.close();
+        if (mmOutputStream != null) {
+            try {
+                mmOutputStream.close();
+                mmOutputStream = null;
+            } catch (Exception ignored) {
+            }
+        }
+        if (mmInputStream != null) {
+            try {
+                mmInputStream.close();
+                mmInputStream = null;
+            } catch (Exception ignored) {
+            }
+        }
+        if (mmSocket != null) {
+            try {
+                mmSocket.close();
+                mmSocket = null;
+            } catch (Exception ignored) {
+            }
+        }
         statusLabel.setText("Bluetooth Closed");
     }
-
+/*
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
-            try {
-                String msg = Long.toString(previousColor);
-                msg += "\n";
-                mmOutputStream.write(msg.getBytes());
-
-                serialHandler.postDelayed(mUpdateTimeTask, 100);
-            } catch (IOException ex) {
+            String msg = Long.toString(previousColor);
+            msg += "\n";
+            if (!write(msg))
                 stopWorker = true;
-            }
+
+            serialHandler.postDelayed(this, 100);
 
             //serialHandler.postAtTime(this, start + (((minutes * 60) + seconds + 1) * 1000));
         }
     };
-
+*/
     void startRapidData() {
         stopRapidWorker = false;
         rapidThread = new Thread(new Runnable() {
@@ -558,23 +586,20 @@ public class MainActivity extends Activity {
                 int blue;
 
                 while (!Thread.currentThread().isInterrupted() && !stopRapidWorker) {
-                    try {
-                        red = ((previousColor >> 16) & 0xFF);
-                        green = ((previousColor >> 8) & 0xFF);
-                        blue = (previousColor & 0xFF);
-                        //alpha= (int) ((tempColor >> 24) & 0xFF);
-                        //String msg = Long.toString(tempColor);
-                        String msg = String.format("%d%03d;%03d;%03d;", 0x0F, red, green, blue);  // 0x0A = Color command
-                        mmOutputStream.write(msg.getBytes());
-
-                           /*buffer[0] = red;
-                           buffer[1] = green;
-                           buffer[2] = blue;
-                           buffer[3] = 0x0A;*/
-                        //mmOutputStream.write(buffer);
-                    } catch (IOException ex) {
+                    red = ((previousColor >> 16) & 0xFF);
+                    green = ((previousColor >> 8) & 0xFF);
+                    blue = (previousColor & 0xFF);
+                    //alpha= (int) ((tempColor >> 24) & 0xFF);
+                    //String msg = Long.toString(tempColor);
+                    String msg = String.format("%d%03d;%03d;%03d;", 0x0F, red, green, blue);  // 0x0A = Color command
+                    if (!write(msg))
                         stopRapidWorker = true;
-                    }
+
+                    /*buffer[0] = red;
+                    buffer[1] = green;
+                    buffer[2] = blue;
+                    buffer[3] = 0x0A;
+                    write(buffer);*/
 
                     try {
                         Thread.sleep(100, 0);
@@ -588,110 +613,125 @@ public class MainActivity extends Activity {
         rapidThread.start();
     }
 
-    void BlackOut() throws IOException {
+    void BlackOut() {
         String msg = String.format("%d%03d;%03d;%03d;", 0x0F, 0, 0, 0);  // 0x0A = Color set command
-        mmOutputStream.write(msg.getBytes());
+        write(msg);
     }
 
-    void AddFadeColor(int color) throws IOException {
+    void AddFadeColor(int color) {
         int red = ((color >> 16) & 0xFF);
         int green = ((color >> 8) & 0xFF);
         int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
         String msg = String.format("%d%03d;%03d;%03d;", 0x01, red, green, blue);  // 0x01 = Fade color command
-        mmOutputStream.write(msg.getBytes());
+        write(msg);
     }
 
-    void DisableEffects() throws IOException {
+    void DisableEffects() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x0E;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void EnableFadeEffect() throws IOException {
+    void EnableFadeEffect() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x04;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void ResetFadeColors() throws IOException {
+    void ResetFadeColors() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x02;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void SetSpeed(int speed) throws IOException {
+    void SetSpeed(int speed) {
         if (speed < 100000) {
             String msg = String.format("%d%05d;", 0x03, speed);  // 0x03 = Speed command
-            mmOutputStream.write(msg.getBytes());
+            write(msg);
         }
     }
 
-    void EnableSnapEffect() throws IOException {
+    void EnableSnapEffect() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x07;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void ResetSnapColors() throws IOException {
+    void ResetSnapColors() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x06;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void AddSnapColor(int color) throws IOException {
+    void AddSnapColor(int color) {
         int red = ((color >> 16) & 0xFF);
         int green = ((color >> 8) & 0xFF);
         int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
         String msg = String.format("%d%03d;%03d;%03d;", 0x05, red, green, blue);  // 0x01 = Snap color command
-        mmOutputStream.write(msg.getBytes());
+        write(msg);
     }
 
-    void EnableRunEffect() throws IOException {
+    void EnableRunEffect() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x0A;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void ResetRunColors() throws IOException {
+    void ResetRunColors() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x09;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void AddRunColor(int color) throws IOException {
+    void AddRunColor(int color) {
         int red = ((color >> 16) & 0xFF);
         int green = ((color >> 8) & 0xFF);
         int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
         String msg = String.format("%d%03d;%03d;%03d;", 0x08, red, green, blue);  // 0x01 = Run color command
-        mmOutputStream.write(msg.getBytes());
+        write(msg);
     }
 
-    void EnableRunFadeEffect() throws IOException {
+    void EnableRunFadeEffect() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x0D;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void ResetRunFadeColors() throws IOException {
+    void ResetRunFadeColors() {
         byte buffer[] = new byte[1];
         buffer[0] = 0x0C;
-        mmOutputStream.write(buffer);
+        write(buffer);
     }
 
-    void AddRunFadeColor(int color) throws IOException {
+    void AddRunFadeColor(int color) {
         int red = ((color >> 16) & 0xFF);
         int green = ((color >> 8) & 0xFF);
         int blue = (color & 0xFF);
         //int alpha= (int) ((color >> 24) & 0xFF);
 
         String msg = String.format("%d%03d;%03d;%03d;", 0x0B, red, green, blue);  // 0x01 = Run color command
-        mmOutputStream.write(msg.getBytes());
+        write(msg);
+    }
+
+    boolean write(String string) {
+        return write(string.getBytes());
+    }
+
+    boolean write(byte[] buffer) {
+        if (mmOutputStream == null)
+            return false;
+        try {
+            mmOutputStream.write(buffer);
+        } catch (IOException ignored) {
+            return false;
+        }
+        return true;
     }
 
 }
