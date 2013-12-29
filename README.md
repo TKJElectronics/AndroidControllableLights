@@ -6,6 +6,8 @@ _________
 
 This is the code is for controlling a WS2801 LED string with your Arduino using your Android phone with Bluetooth as remote control.
 
+The Android code can be found in the root of this repo while the Android app can be found in the [AndroidApp directory](AndroidApp).
+
 You can check out a video demonstration of the project here: <http://www.youtube.com/watch?v=pZSADQihV_Y>
 
-For more information see my blog post at <http://blog.tkjelectronics.dk/> or send me an email at <thomasj@tkjelectronics.dk>.
+For more information see my blog post at <http://blog.tkjelectronics.dk/2013/01/bluetooth-controlled-rgb-light-strip/> or send me an email at <thomasj@tkjelectronics.dk>.
