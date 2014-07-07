@@ -5,11 +5,13 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,16 +50,19 @@ public class MainActivity extends Activity {
     View viewNewColor;
 
     BluetoothAdapter mBluetoothAdapter;
-    BluetoothSocket mmSocket;
-    OutputStream mmOutputStream;
-    InputStream mmInputStream;
-    Thread workerThread;
-    int readBufferPosition;
-    volatile boolean stopWorker;
+    static BluetoothSocket mmSocket;
+    static OutputStream mmOutputStream;
+    static InputStream mmInputStream;
 
-    Thread rapidThread;
-    volatile boolean stopRapidWorker;
+    static Thread workerThread;
+    static volatile boolean stopWorker;
+    int readBufferPosition;
+
+    static Thread rapidThread;
+    static volatile boolean stopRapidWorker;
     //private Handler serialHandler = new Handler();
+
+    private static final String statusConnected = "Bluetooth Opened";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +72,10 @@ public class MainActivity extends Activity {
         Button openButton = (Button) findViewById(R.id.btn_open);
         Button closeButton = (Button) findViewById(R.id.btn_close);
         statusLabel = (TextView) findViewById(R.id.statusText);
+        if (isBTconnected()) {
+            statusLabel.setText(statusConnected); // Set label if we are already connected in a previous instance
+            beginListenForData();
+        }
         viewNewColor = findViewById(R.id.colorView);
         Button mShow = (Button) findViewById(R.id.btn_show);
         fadeColorsCountLabel = (TextView) findViewById(R.id.fadeCount);
@@ -246,18 +255,24 @@ public class MainActivity extends Activity {
                 runFadeColorsCountLabel.setText(Integer.toString(runFadeColorsCount));
             }
         });
+
+        new Handler().postDelayed(new Runnable() { // Hack to hide keyboard when the layout it rotated
+            @Override
+            public void run() {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE); // Hide the keyboard - this is needed when the device is rotated
+                imm.hideSoftInputFromWindow(getWindow().getDecorView().getApplicationWindowToken(), 0);
+            }
+        }, 100);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        closeBT();
+    public void onBackPressed() {
+        closeBT(); // Close Bluetooth connection
+        finish(); // Exit the app
     }
-
 
     public void LiveColorPicker() {
         new AmbilWarnaDialog(this, (previousColor | 0xFF000000), new OnAmbilWarnaListener() {
-
             // Executes, when user click Cancel button
             @Override
             public void onCancel(AmbilWarnaDialog dialog) {
@@ -470,7 +485,7 @@ public class MainActivity extends Activity {
 
         beginListenForData();
 
-        statusLabel.setText("Bluetooth Opened");
+        statusLabel.setText(statusConnected);
         return true;
     }
 
@@ -508,7 +523,7 @@ public class MainActivity extends Activity {
                                 }
                             }
                         }
-                    } catch (IOException ex) {
+                    } catch (Exception ex) {
                         stopWorker = true;
                     }
                 }

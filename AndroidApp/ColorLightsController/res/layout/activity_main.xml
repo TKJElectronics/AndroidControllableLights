@@ -1,268 +1,274 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/linearLayout4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/linearLayout5"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/btn_startFade"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start Fade" />
-
-        <Button
-            android:id="@+id/btn_fadeReset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Reset" />
-
-        <Button
-            android:id="@+id/btn_addFade"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Color" />
-
-        <TextView
-            android:id="@+id/fadeCount"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="0"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/linearLayout4"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal" >          
-
-        <Button
-            android:id="@+id/btn_startSnap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start Snap" />
-
-        <Button
-            android:id="@+id/btn_snapReset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Reset" />
-
-        <Button
-            android:id="@+id/btn_addSnap"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Color" />
-
-        <TextView
-            android:id="@+id/snapCount"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="0"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
-    
-    <LinearLayout
-        android:id="@+id/linearLayout7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/linearLayout6"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/btn_startRun"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start Scroll" />
-
-        <Button
-            android:id="@+id/btn_runReset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Reset" />
-
-        <Button
-            android:id="@+id/btn_addRun"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Color" />
-
-        <TextView
-            android:id="@+id/runCount"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="0"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>    
-
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/linearLayout1"
-        android:layout_marginTop="18dp"
-        android:gravity="center_horizontal" >
-
-        <Button
-            android:id="@+id/btn_show"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select a color"
-            tools:context=".MainActivity" />
-
-        <View
-            android:id="@+id/colorView"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/ic_launcher" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="15dp"
-        android:orientation="vertical" >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <LinearLayout
-            android:id="@+id/linear"
+            android:id="@+id/linearLayout4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:baselineAligned="false"
-            android:measureWithLargestChild="false"
-            android:orientation="horizontal" >
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/linearLayout5"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btn_open"
-                android:layout_width="85dp"
+                android:id="@+id/btn_startFade"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Open" />
+                android:text="Start Fade" />
 
             <Button
-                android:id="@+id/btn_close"
-                android:layout_width="85dp"
+                android:id="@+id/btn_fadeReset"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Close" />
+                android:text="Reset" />
+
+            <Button
+                android:id="@+id/btn_addFade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Color" />
+
+            <TextView
+                android:id="@+id/fadeCount"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="0"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Press Open to Connect" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/linearLayout2"
-        android:gravity="center_horizontal" >
-
-        <Button
-            android:id="@+id/btn_disableEffects"
+        <LinearLayout
+            android:id="@+id/linearLayout6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Stop Effects" />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/linearLayout4"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btn_blackOut"
+            <Button
+                android:id="@+id/btn_startSnap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start Snap" />
+
+            <Button
+                android:id="@+id/btn_snapReset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reset" />
+
+            <Button
+                android:id="@+id/btn_addSnap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Color" />
+
+            <TextView
+                android:id="@+id/snapCount"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="0"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Black Out" />
-    </LinearLayout>
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/linearLayout6"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:id="@+id/linearLayout5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/linearLayout3"
-        android:gravity="center_horizontal" >
+            <Button
+                android:id="@+id/btn_startRun"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start Scroll" />
 
-        <EditText
-            android:id="@+id/speedText"
-            android:layout_width="85dp"
-            android:layout_height="wrap_content"
-            android:text="100" />
+            <Button
+                android:id="@+id/btn_runReset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reset" />
 
-        <Button
-            android:id="@+id/btn_setSpeed"
+            <Button
+                android:id="@+id/btn_addRun"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Color" />
+
+            <TextView
+                android:id="@+id/runCount"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="0"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Set Delay/Speed" />
-    </LinearLayout>
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/linearLayout1"
+            android:layout_marginTop="18dp"
+            android:gravity="center_horizontal">
 
-    <LinearLayout
-        android:id="@+id/linearLayout8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/linearLayout7"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal" >
+            <Button
+                android:id="@+id/btn_show"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select a color"
+                tools:context=".MainActivity" />
 
-        <Button
-            android:id="@+id/btn_startRunFade"
+            <View
+                android:id="@+id/colorView"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/ic_launcher" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Run/Fade" />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn_runFadeReset"
+            <LinearLayout
+                android:id="@+id/linear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:baselineAligned="false"
+                android:measureWithLargestChild="false"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_open"
+                    android:layout_width="85dp"
+                    android:layout_height="wrap_content"
+                    android:text="Open" />
+
+                <Button
+                    android:id="@+id/btn_close"
+                    android:layout_width="85dp"
+                    android:layout_height="wrap_content"
+                    android:text="Close" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Press Open to Connect" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reset" />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/linearLayout2"
+            android:gravity="center_horizontal">
 
-        <Button
-            android:id="@+id/btn_addRunFade"
+            <Button
+                android:id="@+id/btn_disableEffects"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stop Effects" />
+
+            <Button
+                android:id="@+id/btn_blackOut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Black Out" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Color" />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/linearLayout3"
+            android:gravity="center_horizontal">
 
-        <TextView
-            android:id="@+id/runFadeCount"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_vertical|center_horizontal"
-            android:text="0"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
+            <EditText
+                android:id="@+id/speedText"
+                android:layout_width="85dp"
+                android:layout_height="wrap_content"
+                android:text="100" />
 
-</RelativeLayout>
+            <Button
+                android:id="@+id/btn_setSpeed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set Delay/Speed" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/linearLayout7"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_startRunFade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start Run/Fade" />
+
+            <Button
+                android:id="@+id/btn_runFadeReset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reset" />
+
+            <Button
+                android:id="@+id/btn_addRunFade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Color" />
+
+            <TextView
+                android:id="@+id/runFadeCount"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="0"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</ScrollView>
